@@ -33,7 +33,7 @@ h1 {
 	font-size: 100%;
 }
 del {
-	text-decoration: none;
+	text-decoration: line-through;
 	color: #b30000;
 	background: #fadad7;
 }

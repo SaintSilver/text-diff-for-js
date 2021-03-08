@@ -13,6 +13,8 @@
 	<label><input type="radio" name="diff_type" value="diffWords"> 단어비교</label>
 	<label><input type="radio" name="diff_type" value="diffLines"> 줄비교</label>
 	<button id="check">비교하기</button>
+	<button id="plus">+++</button>
+	<button id="minus">---</button>
 </div>
 
 <table>
@@ -29,8 +31,19 @@ var a = document.getElementById('a');
 var b = document.getElementById('b');
 var result = document.getElementById('result');
 var btn = document.getElementById('check');
+var btn_plus = document.getElementById('plus');
+var btn_minus = document.getElementById('minus');
 
 btn.addEventListener('click', changed);
+btn_plus.addEventListener('click', function(){ fontsizing(1) });
+btn_minus.addEventListener('click', function(){ fontsizing(-1) });
+
+function fontsizing(size){
+	var el = document.getElementById('result');
+	var style = window.getComputedStyle(el, null).getPropertyValue('font-size');
+	var fontSize = parseFloat(style); 
+	el.style.fontSize = (fontSize + size) + 'px';
+}
 
 function changed() {
 	var diff = JsDiff[window.diffType](a.textContent, b.textContent);
