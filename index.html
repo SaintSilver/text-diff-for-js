@@ -1,106 +1,102 @@
-<!DOCTYPE html>
-<html>
-<head>
-	<meta charset="utf-8">
-	<title>정성이를 위한 텍스트비교</title>
-	<link rel="stylesheet" href="style.css"/>
-</head>
-<body>
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN" "http://www.w3.org/TR/html4/loose.dtd">
+<HTML>
+<HEAD>
+  <TITLE>정성이를 위한 텍스트비교 version2</TITLE>
+  <link rel="stylesheet" href="style.css"/>
+  <SCRIPT SRC="diff_match_patch.js"></SCRIPT>
+</HEAD>
 
-<div id="settings">
-	<h1>정성이를 위한 텍스트비교</h1>
-	<label><input type="radio" name="diff_type" value="diffChars" checked> 글자비교</label>
-	<label><input type="radio" name="diff_type" value="diffWords"> 단어비교</label>
-	<label><input type="radio" name="diff_type" value="diffLines"> 줄비교</label>
-	<button id="check">비교하기</button>
-	<button id="plus">+++</button>
-	<button id="minus">---</button>
-</div>
+<BODY>
+<H1>정성이를 위한 텍스트비교 version2</H1>
 
-<table>
-	<tr>
-		<td contenteditable="true" id="a">안녕하세요 홍성은입니다 하하 호호 후후 크킄</td>
-		<td contenteditable="true" id="b">안녕하세용 이정성입니다 하하 호호 후훟 크크</td>
-		<td><pre id="result"></pre></td>
-	</tr>
-</table>
 
-<script src="diff.js"></script>
-<script defer>
-var a = document.getElementById('a');
-var b = document.getElementById('b');
-var result = document.getElementById('result');
-var btn = document.getElementById('check');
-var btn_plus = document.getElementById('plus');
-var btn_minus = document.getElementById('minus');
+<SCRIPT>
+var dmp = new diff_match_patch();
 
-btn.addEventListener('click', changed);
-btn_plus.addEventListener('click', function(){ fontsizing(1) });
-btn_minus.addEventListener('click', function(){ fontsizing(-1) });
+function launch() {
+  var text1 = document.getElementById('text1').value;
+  var text2 = document.getElementById('text2').value;
+  
+  var d = dmp.diff_main(text1, text2);
+  
+  var filtered_rst1 = d.filter(original_text);
+  var filtered_rst2 = d.filter(new_text);
 
-function fontsizing(size){
-	var el = document.getElementById('result');
-	var style = window.getComputedStyle(el, null).getPropertyValue('font-size');
-	var fontSize = parseFloat(style); 
-	el.style.fontSize = (fontSize + size) + 'px';
+  document.getElementById('result1').innerHTML = beautify_original(filtered_rst1);
+  document.getElementById('result2').innerHTML = beautify_new(filtered_rst2);
+  
 }
 
-function changed() {
-	var diff = JsDiff[window.diffType](a.textContent, b.textContent);
-	var fragment = document.createDocumentFragment();
-	for (var i=0; i < diff.length; i++) {
-
-		if (diff[i].added && diff[i + 1] && diff[i + 1].removed) {
-			var swap = diff[i];
-			diff[i] = diff[i + 1];
-			diff[i + 1] = swap;
+function beautify_original(array){
+	var result = '';
+	for(var i=0; i<array.length; i++){
+		var str = array[i][1];
+		
+		/*
+		if(str.includes('\n')){
+			console.log(str.indexOf('\n'), str);
+			if(str.indexOf('\n') == 0) str = '<br>'+ str;
+			else str += '<br>';
+			
 		}
-
-		var node;
-		if (diff[i].removed) {
-			node = document.createElement('del');
-			node.appendChild(document.createTextNode(diff[i].value));
-		} else if (diff[i].added) {
-			node = document.createElement('ins');
-			node.appendChild(document.createTextNode(diff[i].value));
+		*/
+		
+		if(array[i][0] == 0 || array[i][0] == 1) {
+			result += '<span>'+ str +'</span>'
 		} else {
-			node = document.createTextNode(diff[i].value);
+			result += '<del class="deleteText" style="background:"#e6ffe6">'+ str +'</del>'
 		}
-		fragment.appendChild(node);
 	}
-
-	result.textContent = '';
-	result.appendChild(fragment);
+	return result;
 }
 
-window.onload = function() {
-	onDiffTypeChange(document.querySelector('#settings [name="diff_type"]:checked'));
-	changed();
-};
+function beautify_new(array){
+	var result = '';
+	for(var i=0; i<array.length; i++){
 
-/*
-a.onpaste = a.onchange =
-b.onpaste = b.onchange = changed;
-
-if ('oninput' in a) {
-	a.oninput = b.oninput = changed;
-} else {
-	a.onkeyup = b.onkeyup = changed;
-}
-*/
-
-function onDiffTypeChange(radio) {
-	window.diffType = radio.value;
-	//document.title = "Diff " + radio.value.slice(4);
-}
-
-var radio = document.getElementsByName('diff_type');
-for (var i = 0; i < radio.length; i++) {
-	radio[i].onchange = function(e) {
-		onDiffTypeChange(e.target);
-		changed();
+		
+		if(array[i][0] == 0 || array[i][0] == -1) {
+			result += '<span>'+ array[i][1] +'</span>'
+		} else {
+			result += '<ins class="insertText" style="background:"#e6ffe6">'+ array[i][1] +'</ins>'
+		}
 	}
+	return result;
 }
-</script>
-</body>
-</html>
+
+function original_text(value){
+	return value[0] == 0 || value[0] == -1;
+}
+
+function new_text(value){
+	return value[0] == 0 || value[0] == 1;
+}
+</SCRIPT>
+
+<FORM action="#" onsubmit="return false">
+<TABLE WIDTH="100%"><TR>
+  <TD WIDTH="25%">
+<H3>비교 1:</H3>
+<TEXTAREA ID="text1" STYLE="width: 100%" ROWS=30>안녕 반가워 나는 홍성은이야, 
+너는 이정성이야,
+이렇게 하면 될것같아 되냐 돼라 좀 
+퇴근하고싶다 하하</TEXTAREA></TD>
+  <TD WIDTH="25%">
+<H3>비교 2 : </H3>
+<TEXTAREA ID="text2" STYLE="width: 100%" ROWS=30>안녕 반가워 나는 이정성이야, 
+너는 홍성은이야,
+오늘은 고구마를 먹을거야 헬스도 할거지
+퇴근하고싶당 하하</TEXTAREA></TD>
+  <TD WIDTH="25%">
+<H3>결과 1 : </H3>
+<div ID="result1" STYLE="width: 100%" ></div></TD>
+  <TD WIDTH="25%">
+<H3>결과 2 : </H3>
+<div ID="result2" STYLE="width: 100%" ></div></TD>
+</TR></TABLE>
+
+<P><INPUT TYPE="button" onClick="launch()" VALUE="Compute Diff"></P>
+</FORM>
+
+</BODY>
+</HTML>
